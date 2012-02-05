@@ -29,13 +29,17 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.status = "normal"
         self._pos = pos
         self._world = world
+
+    @property
+    def world(self):
+        return self._world
         
     @property
     def pos(self):
         return self._pos
         
     @pos.setter
-    def set_pos(self, val):
+    def pos(self, val):
         self._pos = val
     
     @property
@@ -119,7 +123,9 @@ class SpriteImage():
     def image(self):
         return self._surf
     
-def packmethod_simple(image, size, offset, anchors, actions, fps, 
+UNITS = {}
+    
+def packmethod_simple(unittype, image, size, offset, anchors, actions, fps, 
         splitter=(0,0), **kw):
     """ scheme:
         image: (image filename)
@@ -156,7 +162,8 @@ def packmethod_simple(image, size, offset, anchors, actions, fps,
         actionparams.update(dict(imgarr=surfs, fps=fps))
         actiondict[name] = action_factory(**actionparams)
         
-    return FactoryData(AnimatedSprite, dict(statusdict=actiondict, **kw)) # this is a false usage, use units instead
+    # return FactoryData(AnimatedSprite, dict(statusdict=actiondict, **kw)) # this is a false usage, use units instead
+    return FactoryData(UNITS[unittype], dict(statusdict=actiondict, **kw)) # this is a false usage, use units instead
 
 PACK_METHODS = {
     "simple": packmethod_simple,

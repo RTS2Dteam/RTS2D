@@ -7,12 +7,24 @@ from pygame.compat import geterror
 from rts2d import sprite
 from rts2d.pos import Pos
 
+from rts2d.unit import BaseUnit
+from rts2d.ability import MoveAbility
+
 import yaml
 
 settings = yaml.load(open("devil.yml"))
 # if not pygame.font: print ('Warning, fonts disabled')
 # if not pygame.mixer: print ('Warning, sound disabled')
+class TestUnit(BaseUnit):
+    def __init__(self, **kw):
+        super(TestUnit, self).__init__(player="", abilities=[MoveAbility()], **kw)
+        self._statusdict["move"] = self._statusdict["normal"]
+        self.movspd=100.0
+        
+sprite.UNITS.update({"test": TestUnit})
+
 class World(): pass
+
 
 def main():
     """this function is called when the program starts.
@@ -45,6 +57,7 @@ def main():
     
     world = World()
     world.time = 0
+    world.range = Rect(0,0,800,600)
     devil = sprite.sprite_factory(**settings)(world=world, pos=Pos(200,200))
     
     allsprites = pygame.sprite.RenderPlain((devil,))#(fist, chimp))
@@ -54,7 +67,8 @@ def main():
     while going:
         clock.tick(60)
         # world.time = pygame.time.get_ticks()
-        world.time += clock.get_time()
+        world.deltatime = clock.get_time()
+        world.time += world.deltatime
         #Handle Input Events
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -62,7 +76,8 @@ def main():
             elif event.type == KEYDOWN and event.key == K_ESCAPE:
                 going = False
             elif event.type == MOUSEBUTTONDOWN:
-                pygame.time.delay(1000)
+                pos = Pos(*event.pos)
+                devil._abilities[0].use(devil, target_pos=pos)
             # elif event.type == MOUSEBUTTONDOWN:
                 # if fist.punch(chimp):
                     # punch_sound.play() #punch

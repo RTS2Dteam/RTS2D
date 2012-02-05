@@ -1,20 +1,29 @@
-from sprite import AnimatedSprite
+from .sprite import AnimatedSprite
 class BaseUnit(AnimatedSprite):
     """ hp mp kinds of resources
         hit, damage calculations?
     """
-    def __init__(self, world, player, **kw):
+    def __init__(self, player, abilities, **kw):
         """ player not only mean side of the unit, also show resources
         can be used """
-        self._world = world
+        super(BaseUnit, self).__init__(**kw)
         self._player = player
         # XXX: register the sprite to player group
+        self._abilities = abilities
+        # initial abilities
+        for ability in abilities:
+            ability.initial(self)
+        
+    
+    def add_ability(self, ability):
+        self._abilities.append(ability)
+        
+    def remove_ability(self, ability):
+        self._abilities.remove(ability)
     
     def update(self, *args):
-        status = self.status
-        behavior = self.behavior
-        assert status in behavior, "can't determine behavior callback"
-        behavior[status]()
+        for ability in self._abilities:
+            ability.update(self, *args)
     
     def b_normal(self):
         """basic react for each unit"""
@@ -29,9 +38,9 @@ class Building(BaseUnit):
     def __init__(self, cell, ):
         BaseUnit.__init__(self, )
         self.behavior.update(
-            dict(
+            {
                 "normal": self.normal,
-            )
+            }
         )
         
     def normal(self):
